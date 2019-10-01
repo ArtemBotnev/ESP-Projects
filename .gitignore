@@ -1,0 +1,11 @@
+cmake-build-debug/
+CMakeLists.txt
+
+# Log Files
+*.log
+
+# CLion
+.idea/
+
+# main test file
+main.cpp
