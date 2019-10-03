@@ -23,12 +23,12 @@
 #define YELLOW        0xFFE0  
 #define WHITE         0xFFFF
 
-uint16_t get_out_temper_color(int8_t temperature);
+uint16_t get_out_temper_color(int16_t temperature);
 
-uint16_t get_room_temper_color(int8_t temperature);
+uint16_t get_room_temper_color(int16_t temperature);
 
-uint16_t get_atm_press_color(uint16_t pressure);
+uint16_t get_atm_press_color(int16_t pressure);
 
-uint16_t get_humidity_color(int8_t humidity);
+uint16_t get_humidity_color(int16_t humidity);
 
 #endif

@@ -4,7 +4,7 @@
 
 #include "colors.h"
 
-uint16_t get_out_temper_color(int8_t temperature)
+uint16_t get_out_temper_color(int16_t temperature)
 {
     if (temperature < -17) {
         return BLUE;
@@ -21,7 +21,7 @@ uint16_t get_out_temper_color(int8_t temperature)
     }
 }
 
-uint16_t get_room_temper_color(int8_t temperature)
+uint16_t get_room_temper_color(int16_t temperature)
 {
     if (temperature < 17){
         return BLUE;
@@ -32,7 +32,7 @@ uint16_t get_room_temper_color(int8_t temperature)
     }
 }
 
-uint16_t get_atm_press_color(uint16_t pressure)
+uint16_t get_atm_press_color(int16_t pressure)
 {
     if (pressure < 710 || pressure > 790){
         return RED;
@@ -43,7 +43,7 @@ uint16_t get_atm_press_color(uint16_t pressure)
     }
 }
 
-uint16_t get_humidity_color(int8_t humidity)
+uint16_t get_humidity_color(int16_t humidity)
 {
     if (humidity < 28 || humidity > 72) {
         return RED;

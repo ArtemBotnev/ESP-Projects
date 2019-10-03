@@ -38,8 +38,14 @@ extern "C" {
 #define TFT_CLK 18 
 
 // texts size
-#define TITLE_TEXT_SIZE 1
-#define VALUE_TEXT_SIZE 5
+#define SMALL_TEXT 1
+#define TITLE_TEXT_SIZE 2
+#define VALUE_TEXT_SIZE 10
+
+// Y shifts
+#define TOP_MENU_SHIFT_Y 10
+#define BOTTOM_MENU_SHIFT_Y 148
+#define CENTER_MENU_SHIFT_Y 88
 
 // titles
 #define OUT_TEMPER_TITLE    "Outdoors t, C"
@@ -48,23 +54,44 @@ extern "C" {
 #define ROOM_HUM_TITLE      "Room h, %"
 #define PRESSURE_TITLE      "Atm.press. p, mmHg"
 
+#define AVERAGE "average"
+#define MAX "max"
+#define MIN "min"
+
+/**
+ * Container for measured parameters
+ */
+struct MeasureSet {
+    const int16_t curValue, min, average, max;
+};
+
 class Display {
 
 public:
+    bool showAdditionData;
+
     Display();
 
     void begin();
 
-    void drawTemperatureMenu(int8_t outTemperature, int8_t roomTemperature);
+    void setScreenColor(uint16_t color);
 
-    void drawHumidityMenu(uint8_t outHumidity, uint8_t roomHumidity);
+    void fillScreen();
 
-    void drawAtmPressureMenu(uint16_t pressure);
+    void drawTemperatureMenu(MeasureSet outTemperature, MeasureSet roomTemperature);
+
+    void drawHumidityMenu(MeasureSet outHumidity, MeasureSet roomHumidity);
+
+    void drawAtmPressureMenu(MeasureSet pressure);
 
 private:
-    void drawTopMenu(int8_t value, const char *header, uint16_t (*value_color)(int8_t));
+    uint16_t _screenColor = ILI9341_BLACK;
 
-    void drawBottomMenu(int8_t value, const char *header, uint16_t (*value_color)(int8_t));
+    void drawHeadMenu(const char *title);
+
+    void drawMenuCell(MeasureSet measure, const char *header, uint8_t shiftY, uint16_t (*value_color)(int16_t));
+
+    uint8_t  getStartXPosition(const char *str, uint8_t textSize);
 };
 
 #endif
