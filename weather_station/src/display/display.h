@@ -89,9 +89,12 @@ private:
 
     void drawHeadMenu(const char *title);
 
-    void drawMenuCell(MeasureSet measure, const char *header, uint8_t shiftY, uint16_t (*value_color)(int16_t));
-
-    uint8_t  getStartXPosition(const char *str, uint8_t textSize);
+    void drawMenuCell(
+            MeasureSet measure,
+            const char *header,
+            uint8_t x,
+            uint8_t y,
+            uint16_t (*value_color)(int16_t));
 };
 
 #endif

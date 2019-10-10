@@ -21,7 +21,7 @@ void readTemperatureAndShow() {
     delay(SENSOR_DELAY);
 
     struct MeasureSet outT = { -12, -20, -14, -7 };
-    struct MeasureSet roomT = { 27, 22, 25, 28 };
+    struct MeasureSet roomT = { 23, 22, 25, 28 };
 
     display.drawTemperatureMenu(outT, roomT);
     delay(SCREEN_DELAY);

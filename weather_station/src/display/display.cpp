@@ -23,41 +23,51 @@ void Display::fillScreen() {
 void Display::drawTemperatureMenu(MeasureSet outT, MeasureSet roomT) {
     fillScreen();
     // top
-    drawMenuCell(outT, OUT_TEMPER_TITLE, TOP_MENU_SHIFT_Y, get_out_temper_color);
+    drawMenuCell(outT, OUT_TEMPER_TITLE, 43, TOP_MENU_SHIFT_Y, get_out_temper_color);
     // bottom
-    drawMenuCell(roomT, ROOM_TEMPER_TITLE, BOTTOM_MENU_SHIFT_Y, get_out_temper_color);
+    drawMenuCell(roomT, ROOM_TEMPER_TITLE, 68, BOTTOM_MENU_SHIFT_Y, get_out_temper_color);
 }
 
 void Display::drawHumidityMenu(MeasureSet outH, MeasureSet roomH) {
     // top
     fillScreen();
-    drawMenuCell(outH, OUT_HUM_TITLE, TOP_MENU_SHIFT_Y, get_humidity_color);
+    drawMenuCell(outH, OUT_HUM_TITLE, 45, TOP_MENU_SHIFT_Y, get_humidity_color);
     // bottom
-    drawMenuCell(roomH, ROOM_HUM_TITLE, BOTTOM_MENU_SHIFT_Y, get_humidity_color);
+    drawMenuCell(roomH, ROOM_HUM_TITLE, 70, BOTTOM_MENU_SHIFT_Y, get_humidity_color);
 }
 
 void Display::drawAtmPressureMenu(MeasureSet press) {
     fillScreen();
     tft.setCursor(10, 25);
-    drawMenuCell(press, PRESSURE_TITLE, CENTER_MENU_SHIFT_Y, get_atm_press_color);
+    drawMenuCell(press, PRESSURE_TITLE, 10, CENTER_MENU_SHIFT_Y, get_atm_press_color);
 }
 
-void Display::drawMenuCell(MeasureSet measure, const char *header, uint8_t shiftY, uint16_t (*value_color)(int16_t)) {
-    uint8_t x = getStartXPosition(header, TITLE_TEXT_SIZE);
-    tft.setCursor(x, 5 + shiftY);
+void Display::drawMenuCell(
+        MeasureSet measure,
+        const char *header,
+        uint8_t shiftX,
+        uint8_t shiftY,
+        uint16_t (*value_color)(int16_t)) {
+
+    tft.setCursor(shiftX, 5 + shiftY);
 
     tft.setTextColor(WHITE);
     tft.setTextSize(TITLE_TEXT_SIZE);
     tft.println(header);
 
     uint8_t y = 42 + shiftY;
-    if (measure.curValue < 0){
-        tft.setCursor(30, y);
+    if (measure.curValue < -9){
+        tft.setCursor(35, y);
+    } else if (measure.curValue < 0) {
+        tft.setCursor(60, y);
     } else if (measure.curValue < 10) {
-        tft.setCursor(70, y);
+        tft.setCursor(95, y);
+    } else if (measure.curValue < 100) {
+        tft.setCursor(68, y);
     } else {
-        tft.setCursor(55, y);
+        tft.setCursor(35, y);
     }
+
     // current value
     tft.setTextColor(value_color(measure.curValue));
     tft.setTextSize(VALUE_TEXT_SIZE);
@@ -89,15 +99,4 @@ void Display::drawHeadMenu(const char *title) {
     tft.setTextColor(WHITE);
     tft.setTextSize(SMALL_TEXT);
     tft.println(title);
-}
-
-uint8_t Display::getStartXPosition(const char *str, uint8_t textSize) {
-    uint8_t charCount = 0;
-    while (str[charCount] != 0x00) charCount++;
-
-    uint16_t stringSize = (charCount << 3) * textSize;
-    if (stringSize > ILI9341_TFTWIDTH)
-        return 2;
-
-    return (ILI9341_TFTWIDTH - stringSize) >> 2;
 }
