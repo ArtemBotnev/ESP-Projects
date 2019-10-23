@@ -1,6 +1,6 @@
-//
-// Created by Artem Botnev on 10/01/19.
-//
+// Weather station
+// Copyright Artem Botnev 2019
+// MIT License
 
 #include "display.h"
 

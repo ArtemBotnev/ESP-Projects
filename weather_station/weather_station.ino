@@ -1,12 +1,29 @@
+// Weather station
+// Copyright Artem Botnev 2019
+// MIT License
+
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_BME280.h>
+#include <DFRobot_SHT20.h>
 
 #include "src/display/display.h"
 
 #define SENSOR_DELAY 100
 #define SCREEN_DELAY 2800
 
+#define I2C_SDA 33
+#define I2C_SCL 32
+
+Adafruit_BME280 bme;
+DFRobot_SHT20 sht20;
+
 Display display;
 
 void setup() {
+    Wire.begin(I2C_SDA, I2C_SCL);
+    bme.begin();
+    sht20.initSHT20();
     display.begin();
 }
 
@@ -17,31 +34,39 @@ void loop() {
 }
 
 void readTemperatureAndShow() {
-    delay(SENSOR_DELAY);
+    int16_t outCurrentTemper = round(sht20.readTemperature());
     delay(SENSOR_DELAY);
 
-    struct MeasureSet outT = { -12, -20, -14, -7 };
-    struct MeasureSet roomT = { 23, 22, 25, 28 };
+    int16_t roomCurrentTemp = round(bme.readTemperature());
+    delay(SENSOR_DELAY);
+
+    struct MeasureSet outT = { outCurrentTemper, 0, 0, 0 };
+    struct MeasureSet roomT = { roomCurrentTemp, 0, 0, 0 };
 
     display.drawTemperatureMenu(outT, roomT);
     delay(SCREEN_DELAY);
 }
 
 void readHumidityAndShow() {
-    delay(SENSOR_DELAY);
+    uint16_t outCurrentHumidity = round(sht20.readHumidity());
     delay(SENSOR_DELAY);
 
-    struct MeasureSet outH = { 34, 30, 33, 36 };
-    struct MeasureSet roomH = { 50, 48, 50, 51 };
+    uint16_t roomCurrentHumidity = round(bme.readHumidity());
+    delay(SENSOR_DELAY);
+
+    struct MeasureSet outH = { outCurrentHumidity, 0, 0, 0 };
+    struct MeasureSet roomH = { roomCurrentHumidity, 0, 0, 0 };
 
     display.drawHumidityMenu(outH, roomH);
     delay(SCREEN_DELAY);
 }
 
 void readAtmPressureAndShow() {
+    // mmhg
+    uint16_t currentPressure = round(bme.readPressure() * 0.0075F);
     delay(2 * SENSOR_DELAY);
 
-    struct MeasureSet pressure = { 744, 740, 743, 750 };
+    struct MeasureSet pressure = { currentPressure, 0, 0, 0 };
     display.drawAtmPressureMenu(pressure);
     delay(SCREEN_DELAY);
 }

@@ -1,6 +1,6 @@
-//
-// Created by Artem Botnev on 04/01/19.
-//
+// Weather station
+// Copyright Artem Botnev 2019
+// MIT License
 
 /**
  * Colors for display
