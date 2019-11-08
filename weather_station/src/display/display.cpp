@@ -20,8 +20,14 @@ void Display::fillScreen() {
     tft.fillScreen(_screenColor);
 }
 
+void Display::setTitle(const char *title) {
+    _title = (char*) title;
+}
+
 void Display::drawTemperatureMenu(MeasureSet outT, MeasureSet roomT) {
     fillScreen();
+    // header
+    if (showTitle) drawHeadMenu(_title);
     // top
     drawMenuCell(outT, OUT_TEMPER_TITLE, 43, TOP_MENU_SHIFT_Y, get_out_temper_color);
     // bottom
@@ -29,8 +35,10 @@ void Display::drawTemperatureMenu(MeasureSet outT, MeasureSet roomT) {
 }
 
 void Display::drawHumidityMenu(MeasureSet outH, MeasureSet roomH) {
-    // top
     fillScreen();
+    // header
+    if (showTitle) drawHeadMenu(_title);
+    // top
     drawMenuCell(outH, OUT_HUM_TITLE, 45, TOP_MENU_SHIFT_Y, get_humidity_color);
     // bottom
     drawMenuCell(roomH, ROOM_HUM_TITLE, 70, BOTTOM_MENU_SHIFT_Y, get_humidity_color);
@@ -38,6 +46,7 @@ void Display::drawHumidityMenu(MeasureSet outH, MeasureSet roomH) {
 
 void Display::drawAtmPressureMenu(MeasureSet press) {
     fillScreen();
+    if (showTitle) drawHeadMenu(_title);
     tft.setCursor(10, 25);
     drawMenuCell(press, PRESSURE_TITLE, 10, CENTER_MENU_SHIFT_Y, get_atm_press_color);
 }

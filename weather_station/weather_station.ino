@@ -8,6 +8,7 @@
 #include <DFRobot_SHT20.h>
 
 #include "src/display/display.h"
+#include "src/clock/clock.h"
 
 #define SENSOR_DELAY 100
 #define SCREEN_DELAY 2800
@@ -19,12 +20,15 @@ Adafruit_BME280 bme;
 DFRobot_SHT20 sht20;
 
 Display display;
+TClock cl;
 
 void setup() {
     Wire.begin(I2C_SDA, I2C_SCL);
     bme.begin();
     sht20.initSHT20();
     display.begin();
+    display.showTitle = true;
+    cl.init();
 }
 
 void loop() {
@@ -67,6 +71,8 @@ void readAtmPressureAndShow() {
     delay(2 * SENSOR_DELAY);
 
     struct MeasureSet pressure = { currentPressure, 0, 0, 0 };
+
+    display.setTitle(cl.getTime());
     display.drawAtmPressureMenu(pressure);
     delay(SCREEN_DELAY);
 }

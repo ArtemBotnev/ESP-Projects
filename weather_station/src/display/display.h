@@ -68,7 +68,7 @@ struct MeasureSet {
 class Display {
 
 public:
-    bool showAdditionData;
+    bool showTitle, showAdditionData;
 
     Display();
 
@@ -78,6 +78,8 @@ public:
 
     void fillScreen();
 
+    void setTitle(const char *title);
+
     void drawTemperatureMenu(MeasureSet outTemperature, MeasureSet roomTemperature);
 
     void drawHumidityMenu(MeasureSet outHumidity, MeasureSet roomHumidity);
@@ -86,6 +88,7 @@ public:
 
 private:
     uint16_t _screenColor = ILI9341_BLACK;
+    char *_title;
 
     void drawHeadMenu(const char *title);
 
