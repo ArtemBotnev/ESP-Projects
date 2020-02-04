@@ -10,6 +10,8 @@ Display::Display() = default;
 
 void Display::begin() { 
     tft.begin();
+    // rotate screen on 180
+    tft.setRotation(ROTATE_180);
 }
 
 void Display::setScreenColor(uint16_t color) {
@@ -32,6 +34,8 @@ void Display::drawTemperatureMenu(MeasureSet outT, MeasureSet roomT) {
     drawMenuCell(outT, OUT_TEMPER_TITLE, 43, TOP_MENU_SHIFT_Y, get_out_temper_color);
     // bottom
     drawMenuCell(roomT, ROOM_TEMPER_TITLE, 68, BOTTOM_MENU_SHIFT_Y, get_out_temper_color);
+
+    if (showAdditionData) drawBottom();
 }
 
 void Display::drawHumidityMenu(MeasureSet outH, MeasureSet roomH) {
@@ -42,6 +46,8 @@ void Display::drawHumidityMenu(MeasureSet outH, MeasureSet roomH) {
     drawMenuCell(outH, OUT_HUM_TITLE, 45, TOP_MENU_SHIFT_Y, get_humidity_color);
     // bottom
     drawMenuCell(roomH, ROOM_HUM_TITLE, 70, BOTTOM_MENU_SHIFT_Y, get_humidity_color);
+
+    if (showAdditionData) drawBottom();
 }
 
 void Display::drawAtmPressureMenu(MeasureSet press) {
@@ -49,6 +55,8 @@ void Display::drawAtmPressureMenu(MeasureSet press) {
     if (showTitle) drawHeadMenu(_title);
     tft.setCursor(10, 25);
     drawMenuCell(press, PRESSURE_TITLE, 10, CENTER_MENU_SHIFT_Y, get_atm_press_color);
+
+    if (showAdditionData) drawBottom();
 }
 
 void Display::drawMenuCell(
@@ -81,31 +89,42 @@ void Display::drawMenuCell(
     tft.setTextColor(value_color(measure.curValue));
     tft.setTextSize(VALUE_TEXT_SIZE);
     tft.print(measure.curValue);
-    uint8_t yb = 120 + shiftY;
 
-    if (!showAdditionData)
-        return;
+    if (showAdditionData) drawAdditionalData(shiftY, measure, value_color);
+}
 
+void Display::drawAdditionalData(uint8_t shiftY, MeasureSet measure, uint16_t (*value_color)(int16_t)) {
+    uint16_t yb = 120 + shiftY;
     // min value
+    tft.setTextSize(TITLE_TEXT_SIZE);
     tft.setCursor(20, yb);
     tft.setTextColor(value_color(measure.min));
-    tft.setTextSize(TITLE_TEXT_SIZE);
     tft.print(measure.min);
     // average value
-    tft.setCursor(120, yb);
+    tft.setCursor(110, yb);
     tft.setTextColor(value_color(measure.average));
-    tft.setTextSize(TITLE_TEXT_SIZE);
     tft.print(measure.average);
     // max value
     tft.setCursor(200, yb);
     tft.setTextColor(value_color(measure.max));
-    tft.setTextSize(TITLE_TEXT_SIZE);
     tft.print(measure.max);
 }
 
 void Display::drawHeadMenu(const char *title) {
-    tft.setCursor(5, 5);
+    tft.setCursor(25, 7);
     tft.setTextColor(WHITE);
-    tft.setTextSize(SMALL_TEXT);
+    tft.setTextSize(TITLE_TEXT_SIZE);
     tft.println(title);
+}
+
+void Display::drawBottom() {
+    tft.setTextColor(WHITE);
+    tft.setTextSize(TITLE_TEXT_SIZE);
+
+    tft.setCursor(12, 300);
+    tft.print(MIN);
+    tft.setCursor(78, 300);
+    tft.print(AVERAGE);
+    tft.setCursor(192, 300);
+    tft.print(MAX);
 }

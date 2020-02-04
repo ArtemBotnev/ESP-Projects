@@ -3,6 +3,7 @@ CMakeLists.txt
 
 # Log Files
 *.log
+*.bin
 
 # CLion
 .idea/

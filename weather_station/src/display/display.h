@@ -43,9 +43,9 @@ extern "C" {
 #define VALUE_TEXT_SIZE 10
 
 // Y shifts
-#define TOP_MENU_SHIFT_Y 10
-#define BOTTOM_MENU_SHIFT_Y 148
-#define CENTER_MENU_SHIFT_Y 88
+#define TOP_MENU_SHIFT_Y 23
+#define BOTTOM_MENU_SHIFT_Y 161
+#define CENTER_MENU_SHIFT_Y 95
 
 // titles
 #define OUT_TEMPER_TITLE    "Outdoors t, C"
@@ -53,6 +53,9 @@ extern "C" {
 #define OUT_HUM_TITLE       "Outdoors h, %"
 #define ROOM_HUM_TITLE      "Room h, %"
 #define PRESSURE_TITLE      "Atm.press. p, mmHg"
+
+// screen rotation
+#define ROTATE_180 2
 
 #define AVERAGE "average"
 #define MAX "max"
@@ -92,12 +95,16 @@ private:
 
     void drawHeadMenu(const char *title);
 
+    void drawBottom();
+
     void drawMenuCell(
             MeasureSet measure,
             const char *header,
             uint8_t x,
             uint8_t y,
             uint16_t (*value_color)(int16_t));
+
+    void drawAdditionalData(uint8_t shiftY, MeasureSet measure, uint16_t (*value_color)(int16_t));
 };
 
 #endif

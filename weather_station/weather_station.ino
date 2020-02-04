@@ -28,6 +28,7 @@ void setup() {
     sht20.initSHT20();
     display.begin();
     display.showTitle = true;
+    display.showAdditionData = true;
     cl.init();
 }
 
@@ -44,9 +45,10 @@ void readTemperatureAndShow() {
     int16_t roomCurrentTemp = round(bme.readTemperature());
     delay(SENSOR_DELAY);
 
-    struct MeasureSet outT = { outCurrentTemper, 0, 0, 0 };
+    struct MeasureSet outT = { outCurrentTemper, 0, 00, 0 };
     struct MeasureSet roomT = { roomCurrentTemp, 0, 0, 0 };
 
+    display.setTitle(cl.getTime());
     display.drawTemperatureMenu(outT, roomT);
     delay(SCREEN_DELAY);
 }
@@ -72,7 +74,6 @@ void readAtmPressureAndShow() {
 
     struct MeasureSet pressure = { currentPressure, 0, 0, 0 };
 
-    display.setTitle(cl.getTime());
     display.drawAtmPressureMenu(pressure);
     delay(SCREEN_DELAY);
 }
