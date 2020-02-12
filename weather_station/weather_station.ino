@@ -7,8 +7,10 @@
 #include <Adafruit_BME280.h>
 #include <DFRobot_SHT20.h>
 
+#include "src/common.h"
 #include "src/display/display.h"
 #include "src/clock/clock.h"
+#include "src/storage/repository.h"
 
 #define SENSOR_DELAY 100
 #define SCREEN_DELAY 2800
@@ -21,14 +23,17 @@ DFRobot_SHT20 sht20;
 
 Display display;
 TClock cl;
+DataManager dataManager;
 
 void setup() {
     Wire.begin(I2C_SDA, I2C_SCL);
     bme.begin();
     sht20.initSHT20();
+
     display.begin();
     display.showTitle = true;
     display.showAdditionData = true;
+
     cl.init();
 }
 
@@ -42,11 +47,14 @@ void readTemperatureAndShow() {
     int16_t outCurrentTemper = round(sht20.readTemperature());
     delay(SENSOR_DELAY);
 
-    int16_t roomCurrentTemp = round(bme.readTemperature());
+    int16_t roomCurrentTemper = round(bme.readTemperature());
     delay(SENSOR_DELAY);
 
-    struct MeasureSet outT = { outCurrentTemper, 0, 00, 0 };
-    struct MeasureSet roomT = { roomCurrentTemp, 0, 0, 0 };
+//    measureSet<int16_t> outT = { outCurrentTemper, 0, 0, 0 };
+//    measureSet<int16_t> roomT = { roomCurrentTemp, 0, 0, 0 };
+
+    measureSet<int16_t> outT = dataManager.getMeasureSet(OUT_TEMPER, outCurrentTemper);
+    measureSet<int16_t> roomT = dataManager.getMeasureSet(ROOM_TEMPER, roomCurrentTemper);
 
     display.setTitle(cl.getTime());
     display.drawTemperatureMenu(outT, roomT);
@@ -60,8 +68,11 @@ void readHumidityAndShow() {
     uint16_t roomCurrentHumidity = round(bme.readHumidity());
     delay(SENSOR_DELAY);
 
-    struct MeasureSet outH = { outCurrentHumidity, 0, 0, 0 };
-    struct MeasureSet roomH = { roomCurrentHumidity, 0, 0, 0 };
+//    measureSet<int16_t> outH = { outCurrentHumidity, 0, 0, 0 };
+//    measureSet<int16_t> roomH = { roomCurrentHumidity, 0, 0, 0 };
+
+    measureSet<int16_t> outH = dataManager.getMeasureSet(OUT_HUM, outCurrentHumidity);
+    measureSet<int16_t> roomH = dataManager.getMeasureSet(ROOM_HUM, roomCurrentHumidity);
 
     display.drawHumidityMenu(outH, roomH);
     delay(SCREEN_DELAY);
@@ -72,7 +83,8 @@ void readAtmPressureAndShow() {
     uint16_t currentPressure = round(bme.readPressure() * 0.0075F);
     delay(2 * SENSOR_DELAY);
 
-    struct MeasureSet pressure = { currentPressure, 0, 0, 0 };
+//    measureSet<int16_t> pressure = { currentPressure, 0, 0, 0 };
+    measureSet<int16_t> pressure = dataManager.getMeasureSet(PRESSURE, currentPressure);
 
     display.drawAtmPressureMenu(pressure);
     delay(SCREEN_DELAY);

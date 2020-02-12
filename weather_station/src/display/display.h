@@ -25,6 +25,8 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_ILI9341.h>
 
+#include "../common.h"
+
 extern "C" {
     #include "colors.h"
 };
@@ -61,12 +63,6 @@ extern "C" {
 #define MAX "max"
 #define MIN "min"
 
-/**
- * Container for measured parameters
- */
-struct MeasureSet {
-    const int16_t curValue, min, average, max;
-};
 
 class Display {
 
@@ -83,11 +79,11 @@ public:
 
     void setTitle(const char *title);
 
-    void drawTemperatureMenu(MeasureSet outTemperature, MeasureSet roomTemperature);
+    void drawTemperatureMenu(measureSet<int16_t> outTemperature, measureSet<int16_t> roomTemperature);
 
-    void drawHumidityMenu(MeasureSet outHumidity, MeasureSet roomHumidity);
+    void drawHumidityMenu(measureSet<int16_t> outHumidity, measureSet<int16_t> roomHumidity);
 
-    void drawAtmPressureMenu(MeasureSet pressure);
+    void drawAtmPressureMenu(measureSet<int16_t> pressure);
 
 private:
     uint16_t _screenColor = ILI9341_BLACK;
@@ -98,13 +94,13 @@ private:
     void drawBottom();
 
     void drawMenuCell(
-            MeasureSet measure,
+            measureSet<int16_t> measure,
             const char *header,
             uint8_t x,
             uint8_t y,
             uint16_t (*value_color)(int16_t));
 
-    void drawAdditionalData(uint8_t shiftY, MeasureSet measure, uint16_t (*value_color)(int16_t));
+    void drawAdditionalData(uint8_t shiftY, measureSet<int16_t> measure, uint16_t (*value_color)(int16_t));
 };
 
 #endif

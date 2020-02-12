@@ -26,7 +26,7 @@ void Display::setTitle(const char *title) {
     _title = (char*) title;
 }
 
-void Display::drawTemperatureMenu(MeasureSet outT, MeasureSet roomT) {
+void Display::drawTemperatureMenu(measureSet<int16_t> outT, measureSet<int16_t> roomT) {
     fillScreen();
     // header
     if (showTitle) drawHeadMenu(_title);
@@ -38,7 +38,7 @@ void Display::drawTemperatureMenu(MeasureSet outT, MeasureSet roomT) {
     if (showAdditionData) drawBottom();
 }
 
-void Display::drawHumidityMenu(MeasureSet outH, MeasureSet roomH) {
+void Display::drawHumidityMenu(measureSet<int16_t> outH, measureSet<int16_t> roomH) {
     fillScreen();
     // header
     if (showTitle) drawHeadMenu(_title);
@@ -50,7 +50,7 @@ void Display::drawHumidityMenu(MeasureSet outH, MeasureSet roomH) {
     if (showAdditionData) drawBottom();
 }
 
-void Display::drawAtmPressureMenu(MeasureSet press) {
+void Display::drawAtmPressureMenu(measureSet<int16_t> press) {
     fillScreen();
     if (showTitle) drawHeadMenu(_title);
     tft.setCursor(10, 25);
@@ -60,7 +60,7 @@ void Display::drawAtmPressureMenu(MeasureSet press) {
 }
 
 void Display::drawMenuCell(
-        MeasureSet measure,
+        measureSet<int16_t> measure,
         const char *header,
         uint8_t shiftX,
         uint8_t shiftY,
@@ -93,7 +93,7 @@ void Display::drawMenuCell(
     if (showAdditionData) drawAdditionalData(shiftY, measure, value_color);
 }
 
-void Display::drawAdditionalData(uint8_t shiftY, MeasureSet measure, uint16_t (*value_color)(int16_t)) {
+void Display::drawAdditionalData(uint8_t shiftY, measureSet<int16_t> measure, uint16_t (*value_color)(int16_t)) {
     uint16_t yb = 120 + shiftY;
     // min value
     tft.setTextSize(TITLE_TEXT_SIZE);
