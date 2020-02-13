@@ -50,13 +50,10 @@ void readTemperatureAndShow() {
     int16_t roomCurrentTemper = round(bme.readTemperature());
     delay(SENSOR_DELAY);
 
-//    measureSet<int16_t> outT = { outCurrentTemper, 0, 0, 0 };
-//    measureSet<int16_t> roomT = { roomCurrentTemp, 0, 0, 0 };
-
     measureSet<int16_t> outT = dataManager.getMeasureSet(OUT_TEMPER, outCurrentTemper);
     measureSet<int16_t> roomT = dataManager.getMeasureSet(ROOM_TEMPER, roomCurrentTemper);
 
-    display.setTitle(cl.getTime());
+    display.setTitle(cl.getTimeString());
     display.drawTemperatureMenu(outT, roomT);
     delay(SCREEN_DELAY);
 }
@@ -67,9 +64,6 @@ void readHumidityAndShow() {
 
     uint16_t roomCurrentHumidity = round(bme.readHumidity());
     delay(SENSOR_DELAY);
-
-//    measureSet<int16_t> outH = { outCurrentHumidity, 0, 0, 0 };
-//    measureSet<int16_t> roomH = { roomCurrentHumidity, 0, 0, 0 };
 
     measureSet<int16_t> outH = dataManager.getMeasureSet(OUT_HUM, outCurrentHumidity);
     measureSet<int16_t> roomH = dataManager.getMeasureSet(ROOM_HUM, roomCurrentHumidity);
@@ -83,7 +77,6 @@ void readAtmPressureAndShow() {
     uint16_t currentPressure = round(bme.readPressure() * 0.0075F);
     delay(2 * SENSOR_DELAY);
 
-//    measureSet<int16_t> pressure = { currentPressure, 0, 0, 0 };
     measureSet<int16_t> pressure = dataManager.getMeasureSet(PRESSURE, currentPressure);
 
     display.drawAtmPressureMenu(pressure);

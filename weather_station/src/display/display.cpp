@@ -33,7 +33,7 @@ void Display::drawTemperatureMenu(measureSet<int16_t> outT, measureSet<int16_t> 
     // top
     drawMenuCell(outT, OUT_TEMPER_TITLE, 43, TOP_MENU_SHIFT_Y, get_out_temper_color);
     // bottom
-    drawMenuCell(roomT, ROOM_TEMPER_TITLE, 68, BOTTOM_MENU_SHIFT_Y, get_out_temper_color);
+    drawMenuCell(roomT, ROOM_TEMPER_TITLE, 68, BOTTOM_MENU_SHIFT_Y, get_room_temper_color);
 
     if (showAdditionData) drawBottom();
 }

@@ -11,7 +11,7 @@ class TClock {
 public:
     void init();
 
-    const char *getTime();
+    const char *getTimeString();
 
 private:
     static const uint8_t TIME_STRING_SIZE = 17;
