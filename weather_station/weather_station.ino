@@ -11,6 +11,7 @@
 #include "src/display/display.h"
 #include "src/clock/clock.h"
 #include "src/storage/repository.h"
+#include "src/network/network.h"
 
 #define SENSOR_DELAY 100
 #define SCREEN_DELAY 2800
@@ -18,12 +19,20 @@
 #define I2C_SDA 33
 #define I2C_SCL 32
 
+#define NETWORK_ENABLED true
+
+char ssid[] = "XXXXXX";     // your network SSID (name)
+char password[] = "YYYYYY"; // your network key
+
 Adafruit_BME280 bme;
 DFRobot_SHT20 sht20;
 
 Display display;
 TClock cl;
 DataManager dataManager;
+WifiConnectManager wifiManger;
+
+bool isNetAvailable;
 
 void setup() {
     Wire.begin(I2C_SDA, I2C_SCL);
@@ -34,6 +43,8 @@ void setup() {
     display.showTitle = true;
     display.showAdditionData = true;
 
+    if (NETWORK_ENABLED) wifiManger.init(ssid, password);
+
     cl.init();
 }
 
@@ -41,6 +52,8 @@ void loop() {
     readTemperatureAndShow();
     readHumidityAndShow();
     readAtmPressureAndShow();
+
+    if (NETWORK_ENABLED) doNetWork();
 }
 
 void readTemperatureAndShow() {
@@ -81,4 +94,12 @@ void readAtmPressureAndShow() {
 
     display.drawAtmPressureMenu(pressure);
     delay(SCREEN_DELAY);
+}
+
+void doNetWork() {
+    if (isNetAvailable) {
+//        TODO:"do network"
+    } else {
+        isNetAvailable = wifiManger.connectionEstablished();
+    }
 }
