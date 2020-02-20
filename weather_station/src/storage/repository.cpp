@@ -54,3 +54,43 @@ void DataManager::clearCache() {
     delete cache;
     cache = new Cache();
 }
+
+const char *DataManager::initExternalStorage() {
+    if(!SD.begin(CARD_CS_PIN)) {
+        return  "Card Mount Failed";
+    }
+
+    uint8_t cardType = SD.cardType();
+
+    if(cardType == CARD_NONE){
+        return "No SD card attached";
+    }
+
+
+    uint64_t cardSize = SD.cardSize() / (1024 * 1024);
+    static char result[15 + 10];
+    sprintf(result, "SD Card Size: %lluMB\n", cardSize);
+
+    fs = &SD;
+    cardAvailable = true;
+
+    return result;
+}
+
+networkProperty DataManager::readNetworkProperty() {
+    File file = fs->open(networkPropertyFile);
+
+    if (!file) {
+        return networkProperty { "error", "Error of file opening" };
+    }
+
+    StaticJsonDocument<256> doc;
+    DeserializationError error = deserializeJson(doc, file);
+    if (error) {
+        return networkProperty { "error", "Error of json deserialization" };;
+    }
+
+    file.close();
+
+    return networkProperty { doc["ssip"], doc["password"] };
+}

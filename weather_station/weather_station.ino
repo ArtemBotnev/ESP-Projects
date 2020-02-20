@@ -35,6 +35,17 @@ void setup() {
     display.showAdditionData = true;
 
     cl.init();
+
+//    Serial.begin(115200);
+//    String s = dataManager.initExternalStorage();
+//    Serial.println(s);
+//
+//    networkProperty networkProperty = dataManager.readNetworkProperty();
+//    Serial.print("ssid: ");
+//    Serial.print(networkProperty.ssid);
+//    Serial.println(" ");
+//    Serial.print("password: ");
+//    Serial.println(networkProperty.password);
 }
 
 void loop() {

@@ -7,16 +7,37 @@
 
 #include "../common.h"
 
+#include "FS.h"
+#include "SD.h"
+#include "SPI.h"
+
+#include <ArduinoJson.h>
+
+#define CARD_CS_PIN 27
+
+struct networkProperty { const char *ssid, *password; };
+
 class DataManager {
 
 public:
+    bool useExternalStorage = true;
+
     DataManager();
 
     measureSet<int16_t> getMeasureSet(MeasureType type, int16_t currentVal);
 
     void clearCache();
 
+    const char *initExternalStorage();
+
+    networkProperty readNetworkProperty();
+
 private:
+    const char *networkPropertyFile = "/network.json";
+    const char *backupFile = "/saved_state.json";
+    fs::FS *fs;
+    bool cardAvailable;
+
     struct item {
         int16_t min;
         int16_t max;
