@@ -7,6 +7,10 @@
 
 #include "inttypes.h"
 
+#define ERROR "Error!"
+// count of enum items in MeasureType
+#define MEASURE_TYPES_COUNT 5
+
 enum MeasureType { ROOM_TEMPER, OUT_TEMPER, ROOM_HUM, OUT_HUM, PRESSURE };
 
 /**

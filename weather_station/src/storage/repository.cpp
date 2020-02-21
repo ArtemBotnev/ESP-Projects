@@ -9,27 +9,10 @@ DataManager::DataManager() {
 }
 
 measureSet<int16_t> DataManager::getMeasureSet(MeasureType type, int16_t currentVal) {
-    item *item;
-
-    switch (type) {
-        case (ROOM_TEMPER):
-            item = &cache->roomTemp;
-            break;
-        case (OUT_TEMPER):
-            item = &cache->outTemp;
-            break;
-        case (ROOM_HUM):
-            item = &cache->roomHum;
-            break;
-        case (OUT_HUM):
-            item = &cache->outHum;
-            break;
-        case (PRESSURE):
-            item = &cache->pressure;
-            break;
-        default:
-            // error
-            return measureSet<int16_t>{ -1000, -1000, -1000, -1000 };
+    item *item = getCacheItemByType(type);
+    if (!item) {
+        // error
+        return measureSet<int16_t>{ -1000, -1000, -1000, -1000 };
     }
 
     if (currentVal < item->min) {
@@ -56,6 +39,10 @@ void DataManager::clearCache() {
 }
 
 const char *DataManager::initExternalStorage() {
+    if (!useExternalStorage) {
+        return errorStorageNotAvailable;
+    }
+
     if(!SD.begin(CARD_CS_PIN)) {
         return  "Card Mount Failed";
     }
@@ -78,19 +65,146 @@ const char *DataManager::initExternalStorage() {
 }
 
 networkProperty DataManager::readNetworkProperty() {
-    File file = fs->open(networkPropertyFile);
-
-    if (!file) {
-        return networkProperty { "error", "Error of file opening" };
+    if (!useExternalStorage) {
+        return networkProperty { ERROR, errorStorageNotAvailable };
     }
 
-    StaticJsonDocument<256> doc;
+    if (!cardAvailable) {
+        return networkProperty { ERROR, errorReadingCard };
+    }
+
+    File file = fs->open(networkPropertyFile);
+    if (!file) {
+        return networkProperty { ERROR, errorFileOpening };
+    }
+
+    const int capacity = JSON_OBJECT_SIZE(2) + 2 * JSON_OBJECT_SIZE(1);
+    StaticJsonDocument<capacity> doc;
     DeserializationError error = deserializeJson(doc, file);
     if (error) {
-        return networkProperty { "error", "Error of json deserialization" };;
+        return networkProperty { ERROR, strcat(errorJsonDeserialization, error.c_str()) };
     }
 
     file.close();
 
-    return networkProperty { doc["ssip"], doc["password"] };
+    return networkProperty { doc["wifi"]["ssip"], doc["wifi"]["pass"] };
+}
+
+void DataManager::setSaveStateFrequency(uint8_t minutes) {
+    saveStateFrequency = minutes;
+}
+
+DataManager::item *DataManager::getCacheItemByType(MeasureType type) {
+    switch (type) {
+        case (ROOM_TEMPER):
+            return &cache->roomTemp;
+        case (OUT_TEMPER):
+            return &cache->outTemp;
+        case (ROOM_HUM):
+            return &cache->roomHum;
+        case (OUT_HUM):
+            return &cache->outHum;
+        case (PRESSURE):
+            return &cache->pressure;
+        default:
+            // error
+            return NULL;
+    }
+}
+
+bool DataManager::saveState() {
+    if (!useExternalStorage && !cardAvailable) {
+        return false;
+    }
+
+    // remove old state file
+    fs->remove(stateFile);
+
+    // serialization;
+    const int capacity = JSON_OBJECT_SIZE(4) + JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT)
+            + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5);
+    StaticJsonDocument<capacity> doc;
+    // TODO: set real values from clock!
+    doc["time_stamp_seconds"] = 100000;
+    doc["date"] = "20.02.2020";
+    doc["time"] = "16:25";
+
+    const int arrayCapacity = JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT) + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5);
+    StaticJsonDocument<arrayCapacity> arrayDoc;
+    item *item;
+    for (uint8_t i = 0; i < MEASURE_TYPES_COUNT; i++) {
+        MeasureType type = (MeasureType) i;
+        item = getCacheItemByType(type);
+
+        JsonObject obj = arrayDoc.createNestedObject();
+        obj["type_index"] = i;
+        obj["min"] = item->min;
+        obj["max"] = item->max;
+        obj["average"] = item->average;
+        obj["factor"] = item->factor;
+    }
+    doc["measurements"] = arrayDoc;
+
+    // write to file
+    File file = fs->open(stateFile, FILE_WRITE);
+    if (!file) {
+        return false;
+    }
+
+    if (serializeJson(doc, file) == 0) {
+        return false;
+    }
+
+    file.close();
+
+    return true;
+}
+
+bool DataManager::readState() {
+    if (!useExternalStorage && !cardAvailable) {
+        return false;
+    }
+
+    File file = fs->open(stateFile);
+    if (!file) {
+        return false;
+    }
+
+    // deserialization;
+    const int capacity = JSON_OBJECT_SIZE(4) + JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT)
+                         + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(MEASURE_TYPES_COUNT);
+    StaticJsonDocument<capacity> doc;
+    DeserializationError error = deserializeJson(doc, file);
+    if (error) {
+        return false;
+    }
+
+    file.close();
+
+    uint32_t timeStamp = doc["time_stamp_seconds"];
+    const char *date = doc["date"];
+    const char *time = doc["time"];
+
+    const int arrayCapacity = JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT) + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5);
+    StaticJsonDocument<arrayCapacity> arrayDoc;
+    const char* jsonString = doc["measurements"];
+    error = deserializeJson(arrayDoc, jsonString);
+    if (error) {
+        return false;
+    }
+
+    JsonArray array = arrayDoc.as<JsonArray>();
+    item *item;
+    for(JsonVariant v : array) {
+        MeasureType type = (MeasureType) (int) v["type_index"];
+        item = getCacheItemByType(type);
+        if (!item) continue;
+
+        item->min = v["min"];
+        item->max = v["max"];
+        item->average = v["average"];
+        item->factor = v["factor"];
+    }
+
+    return true;
 }

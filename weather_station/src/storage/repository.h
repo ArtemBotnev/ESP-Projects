@@ -32,9 +32,29 @@ public:
 
     networkProperty readNetworkProperty();
 
+    /**
+     * changes default frequency of cache state
+     * can be used optionally because default value exists.
+     *
+     * @param minutes interval of savings
+     */
+    void setSaveStateFrequency(uint8_t minutes);
+
 private:
     const char *networkPropertyFile = "/network.json";
-    const char *backupFile = "/saved_state.json";
+    const char *stateFile = "/saved_state.json";
+
+    // errors
+    char *errorStorageNotAvailable =
+            "External storage not available. Attache SD card and enable property DataManager::useExternalStorage";
+    char *errorReadingCard = "Cannot read SD card!";
+    char *errorFileOpening = "Error of file opening!";
+    char *errorJsonDeserialization = "Error of json deserialization! - ";
+
+    // must be not less than 1 and not more than 59 minutes
+    uint8_t saveStateFrequency = 10; // 10 minutes interval by default
+    uint8_t currentMinute;
+
     fs::FS *fs;
     bool cardAvailable;
 
@@ -57,6 +77,22 @@ private:
     };
 
     Cache *cache;
+
+    /**
+     * saves current state of repository cache data to .json file on SD card
+     *
+     * @return true if state successfully saved, otherwise false
+     */
+    bool saveState();
+
+    /**
+     * reads state from repository .json file on SD card and store it to cache
+     *
+     * @return true if state successfully read, otherwise false
+     */
+    bool readState();
+
+    item *getCacheItemByType(MeasureType type);
 };
 
 #endif //STORAGE_REPOSITORY_H

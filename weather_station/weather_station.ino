@@ -36,6 +36,9 @@ void setup() {
 
     cl.init();
 
+    // must be not less than 1 and not more than 59 minutes
+    dataManager.setSaveStateFrequency(3);
+
 //    Serial.begin(115200);
 //    String s = dataManager.initExternalStorage();
 //    Serial.println(s);

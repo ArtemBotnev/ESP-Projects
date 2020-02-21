@@ -1,0 +1,10 @@
+ This file exists just for demonstration json structure which must be presented in
+ network.json file placed in root directory of sd card.
+
+
+{
+  "wifi": {
+    "ssip": "MyWifi",
+    "pass": "MySuperSecurePassword"
+  }
+}
