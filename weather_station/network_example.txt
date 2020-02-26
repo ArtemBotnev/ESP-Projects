@@ -4,7 +4,7 @@
 
 {
   "wifi": {
-    "ssip": "MyWifi",
-    "pass": "MySuperSecurePassword"
+    "ssid":"MyWifi",
+    "pass":"MySuperSecurePassword"
   }
 }

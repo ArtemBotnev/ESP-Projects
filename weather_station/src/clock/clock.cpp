@@ -1,5 +1,5 @@
 // Weather station
-// Copyright Artem Botnev 2019
+// Copyright Artem Botnev 2019-2020
 // MIT License
 
 #include "clock.h"
@@ -20,8 +20,21 @@ void TClock::init() {
 const char *TClock::getTimeString() {
     _dt = _rtc.getDateTime();
 
-    static char result[TIME_STRING_SIZE];
-    sprintf(result, TIME_PATTERN, _dt.hour, _dt.minute, _dt.day, _dt.month, _dt.year);
+    static char result[DATE_TIME_STRING_SIZE];
+    sprintf(result, DATE_TIME_PATTERN, _dt.hour, _dt.minute, _dt.day, _dt.month, _dt.year);
 
     return result;
+}
+
+TClock::clockDataContainer TClock::getClockData() {
+    _dt = _rtc.getDateTime();
+
+    uint32_t sec = _dt.unixtime - 24 * 60 * 60;
+
+    char date[DATE_STRING_SIZE];
+    sprintf(date, DATE_PATTERN, _dt.day, _dt.month, _dt.year);
+    char time[TIME_STRING_SIZE];
+    sprintf(time, TIME_PATTERN, _dt.hour, _dt.minute);
+
+    return clockDataContainer { sec, _dt.hour, _dt.minute, date, time };
 }

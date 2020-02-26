@@ -1,5 +1,5 @@
 // Weather station
-// Copyright Artem Botnev 2020
+// Copyright Artem Botnev 2019-2020
 // MIT License
 
 #include "repository.h"
@@ -12,7 +12,7 @@ measureSet<int16_t> DataManager::getMeasureSet(MeasureType type, int16_t current
     item *item = getCacheItemByType(type);
     if (!item) {
         // error
-        return measureSet<int16_t>{ -1000, -1000, -1000, -1000 };
+        return measureSet<int16_t> { -1000, -1000, -1000, -1000 };
     }
 
     if (currentVal < item->min) {
@@ -44,7 +44,7 @@ const char *DataManager::initExternalStorage() {
     }
 
     if(!SD.begin(CARD_CS_PIN)) {
-        return  "Card Mount Failed";
+        return "Card Mount Failed";
     }
 
     uint8_t cardType = SD.cardType();
@@ -64,6 +64,10 @@ const char *DataManager::initExternalStorage() {
     return result;
 }
 
+bool DataManager::isCardAvailable() {
+    return cardAvailable;
+}
+
 networkProperty DataManager::readNetworkProperty() {
     if (!useExternalStorage) {
         return networkProperty { ERROR, errorStorageNotAvailable };
@@ -78,7 +82,7 @@ networkProperty DataManager::readNetworkProperty() {
         return networkProperty { ERROR, errorFileOpening };
     }
 
-    const int capacity = JSON_OBJECT_SIZE(2) + 2 * JSON_OBJECT_SIZE(1);
+    const int capacity = JSON_OBJECT_SIZE(1) + 2 * JSON_OBJECT_SIZE(1);
     StaticJsonDocument<capacity> doc;
     DeserializationError error = deserializeJson(doc, file);
     if (error) {
@@ -87,11 +91,27 @@ networkProperty DataManager::readNetworkProperty() {
 
     file.close();
 
-    return networkProperty { doc["wifi"]["ssip"], doc["wifi"]["pass"] };
+    const char *ssid = doc[wifi_s][ssid_s];
+    const char *pass = doc[wifi_s][pass_s];
+
+    return networkProperty { ssid, pass };
 }
 
 void DataManager::setSaveStateFrequency(uint8_t minutes) {
     saveStateFrequency = minutes;
+}
+
+bool DataManager::setTimeAndCheckStateSaveAction(
+        uint32_t secondsStamp,
+        uint8_t minuteOfHour,
+        const char *date,
+        const char *time) {
+
+    if (minuteOfHour % saveStateFrequency != 0) {
+        return true;
+    }
+
+    return saveState(secondsStamp, date, time);
 }
 
 DataManager::item *DataManager::getCacheItemByType(MeasureType type) {
@@ -112,7 +132,7 @@ DataManager::item *DataManager::getCacheItemByType(MeasureType type) {
     }
 }
 
-bool DataManager::saveState() {
+bool DataManager::saveState(uint32_t secondsStamp, const char *date, const char *time) {
     if (!useExternalStorage && !cardAvailable) {
         return false;
     }
@@ -124,10 +144,9 @@ bool DataManager::saveState() {
     const int capacity = JSON_OBJECT_SIZE(4) + JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT)
             + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5);
     StaticJsonDocument<capacity> doc;
-    // TODO: set real values from clock!
-    doc["time_stamp_seconds"] = 100000;
-    doc["date"] = "20.02.2020";
-    doc["time"] = "16:25";
+    doc[time_stamp_s] = secondsStamp;
+    doc[date_s] = date;
+    doc[time_s] = time;
 
     const int arrayCapacity = JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT) + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5);
     StaticJsonDocument<arrayCapacity> arrayDoc;
@@ -137,13 +156,13 @@ bool DataManager::saveState() {
         item = getCacheItemByType(type);
 
         JsonObject obj = arrayDoc.createNestedObject();
-        obj["type_index"] = i;
-        obj["min"] = item->min;
-        obj["max"] = item->max;
-        obj["average"] = item->average;
-        obj["factor"] = item->factor;
+        obj[type_index_s] = i;
+        obj[min_s] = item->min;
+        obj[max_s] = item->max;
+        obj[average_s] = item->average;
+        obj[factor_s] = item->factor;
     }
-    doc["measurements"] = arrayDoc;
+    doc[measurements_s] = arrayDoc;
 
     // write to file
     File file = fs->open(stateFile, FILE_WRITE);
@@ -181,13 +200,13 @@ bool DataManager::readState() {
 
     file.close();
 
-    uint32_t timeStamp = doc["time_stamp_seconds"];
-    const char *date = doc["date"];
-    const char *time = doc["time"];
+    uint32_t timeStamp = doc[time_stamp_s];
+    const char *date = doc[date_s];
+    const char *time = doc[time_s];
 
     const int arrayCapacity = JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT) + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5);
     StaticJsonDocument<arrayCapacity> arrayDoc;
-    const char* jsonString = doc["measurements"];
+    const char* jsonString = doc[measurements_s];
     error = deserializeJson(arrayDoc, jsonString);
     if (error) {
         return false;
@@ -196,14 +215,14 @@ bool DataManager::readState() {
     JsonArray array = arrayDoc.as<JsonArray>();
     item *item;
     for(JsonVariant v : array) {
-        MeasureType type = (MeasureType) (int) v["type_index"];
+        MeasureType type = (MeasureType) (int) v[type_index_s];
         item = getCacheItemByType(type);
         if (!item) continue;
 
-        item->min = v["min"];
-        item->max = v["max"];
-        item->average = v["average"];
-        item->factor = v["factor"];
+        item->min = v[min_s];
+        item->max = v[max_s];
+        item->average = v[average_s];
+        item->factor = v[factor_s];
     }
 
     return true;

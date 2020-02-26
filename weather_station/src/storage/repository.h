@@ -1,5 +1,5 @@
 // Weather station
-// Copyright Artem Botnev 2020
+// Copyright Artem Botnev 2019-2020
 // MIT License
 
 #ifndef STORAGE_REPOSITORY_H
@@ -32,6 +32,8 @@ public:
 
     networkProperty readNetworkProperty();
 
+    bool isCardAvailable();
+
     /**
      * changes default frequency of cache state
      * can be used optionally because default value exists.
@@ -40,11 +42,43 @@ public:
      */
     void setSaveStateFrequency(uint8_t minutes);
 
+    /**
+     * reads state from repository .json file on SD card and store it to cache
+     *
+     * @return true if state successfully read, otherwise false
+     */
+    bool readState();
+
+    /**
+     * sets current time and checks for periodic save state according to this time
+     *
+     * @param secondsStamp - seconds from 1970
+     * @param minuteOfHour
+     * @param date string
+     * @param time string
+     * @return true if all fork as expected, otherwise false
+     */
+    bool setTimeAndCheckStateSaveAction(uint32_t secondsStamp, uint8_t minuteOfHour, const char *date, const char *time);
+
 private:
+    // files:
     const char *networkPropertyFile = "/network.json";
     const char *stateFile = "/saved_state.json";
-
-    // errors
+    // properties:
+    const char *wifi_s = "wifi";
+    const char *ssid_s = "ssid";
+    const char *pass_s = "pass";
+    // state:
+    const char *time_stamp_s = "time_stamp_seconds";
+    const char *date_s = "date";
+    const char *time_s = "time";
+    const char *measurements_s = "measurements";
+    const char *type_index_s = "type_index";
+    const char *min_s = "min";
+    const char *max_s = "max";
+    const char *average_s = "average";
+    const char *factor_s = "factor";
+    // errors:
     char *errorStorageNotAvailable =
             "External storage not available. Attache SD card and enable property DataManager::useExternalStorage";
     char *errorReadingCard = "Cannot read SD card!";
@@ -81,16 +115,12 @@ private:
     /**
      * saves current state of repository cache data to .json file on SD card
      *
+     * @param secondsStamp - seconds from 1970
+     * @param date string
+     * @param time string
      * @return true if state successfully saved, otherwise false
      */
-    bool saveState();
-
-    /**
-     * reads state from repository .json file on SD card and store it to cache
-     *
-     * @return true if state successfully read, otherwise false
-     */
-    bool readState();
+    bool saveState(uint32_t secondsStamp, const char *date, const char *time);
 
     item *getCacheItemByType(MeasureType type);
 };

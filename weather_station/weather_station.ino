@@ -1,5 +1,5 @@
 // Weather station
-// Copyright Artem Botnev 2019
+// Copyright Artem Botnev 2019-2020
 // MIT License
 
 #include <Wire.h>
@@ -25,36 +25,37 @@ Display display;
 TClock cl;
 DataManager dataManager;
 
+//bool propertiesHasRead;
+
 void setup() {
     Wire.begin(I2C_SDA, I2C_SCL);
     bme.begin();
     sht20.initSHT20();
+
+//    Serial.begin(115200);
+//    String s = dataManager.initExternalStorage();
+//    Serial.println(s);
+    // must be not less than 1 and not more than 59 minutes
+//    dataManager.setSaveStateFrequency(3);
 
     display.begin();
     display.showTitle = true;
     display.showAdditionData = true;
 
     cl.init();
-
-    // must be not less than 1 and not more than 59 minutes
-    dataManager.setSaveStateFrequency(3);
-
-//    Serial.begin(115200);
-//    String s = dataManager.initExternalStorage();
-//    Serial.println(s);
-//
-//    networkProperty networkProperty = dataManager.readNetworkProperty();
-//    Serial.print("ssid: ");
-//    Serial.print(networkProperty.ssid);
-//    Serial.println(" ");
-//    Serial.print("password: ");
-//    Serial.println(networkProperty.password);
 }
 
 void loop() {
     readTemperatureAndShow();
     readHumidityAndShow();
     readAtmPressureAndShow();
+
+    if (dataManager.useExternalStorage && dataManager.isCardAvailable()) {
+        TClock::clockDataContainer c = cl.getClockData();
+//        dataManager.setTimeAndCheckStateSaveAction(c.secondsStamp, c.minuteOfHour, c.date, c.time);
+        dataManager.setTimeAndCheckStateSaveAction(100000, 3, "26.0.2020", "13:37");
+        // TODO: clear cache each new day!!!
+    }
 }
 
 void readTemperatureAndShow() {
