@@ -1,5 +1,5 @@
 // Weather station
-// Copyright Artem Botnev 2019
+// Copyright Artem Botnev 2019-2020
 // MIT License
 
 #include "clock.h"
@@ -22,6 +22,16 @@ const char *TClock::getTimeString() {
 
     static char result[TIME_STRING_SIZE];
     sprintf(result, TIME_PATTERN, _dt.hour, _dt.minute, _dt.day, _dt.month, _dt.year);
+
+    return result;
+}
+
+bool TClock::isNewDay() {
+    bool result = false;
+    if (previousHourValue == 23 && _dt.hour == 0) {
+        result = true;
+    }
+    previousHourValue = _dt.hour;
 
     return result;
 }

@@ -1,5 +1,5 @@
 // Weather station
-// Copyright Artem Botnev 2019
+// Copyright Artem Botnev 2019-2020
 // MIT License
 
 #include <Wire.h>
@@ -41,6 +41,9 @@ void loop() {
     readTemperatureAndShow();
     readHumidityAndShow();
     readAtmPressureAndShow();
+
+    // reset additional data if a new day has come
+    if (cl.isNewDay()) dataManager.clearCache();
 }
 
 void readTemperatureAndShow() {
