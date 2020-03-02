@@ -43,7 +43,10 @@ const char *DataManager::initExternalStorage() {
         return errorStorageNotAvailable;
     }
 
-    if(!SD.begin(CARD_CS_PIN)) {
+
+    SPIClass * hspi = new SPIClass(HSPI);
+    hspi->begin(25, 26, 27, CARD_CS_PIN); //SCLK, MISO, MOSI, SS
+    if(!SD.begin(CARD_CS_PIN, *hspi)) {
         return "Card Mount Failed";
     }
 

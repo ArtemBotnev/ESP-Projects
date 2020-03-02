@@ -33,7 +33,7 @@ void setup() {
     sht20.initSHT20();
 
 //    Serial.begin(115200);
-//    String s = dataManager.initExternalStorage();
+    String s = dataManager.initExternalStorage();
 //    Serial.println(s);
     // must be not less than 1 and not more than 59 minutes
 //    dataManager.setSaveStateFrequency(3);

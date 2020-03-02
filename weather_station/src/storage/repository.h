@@ -13,7 +13,8 @@
 
 #include <ArduinoJson.h>
 
-#define CARD_CS_PIN 27
+//#define CARD_CS_PIN 27
+#define CARD_CS_PIN 32
 
 struct networkProperty { const char *ssid, *password; };
 
