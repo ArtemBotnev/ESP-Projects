@@ -18,12 +18,16 @@
 #define I2C_SDA 33
 #define I2C_SCL 32
 
+#define USE_STORAGE true
+
 Adafruit_BME280 bme;
 DFRobot_SHT20 sht20;
 
 Display display;
 TClock cl;
 DataManager dataManager;
+
+bool storageIsAvailable;
 
 void setup() {
     Wire.begin(I2C_SDA, I2C_SCL);
@@ -35,6 +39,10 @@ void setup() {
     display.showAdditionData = true;
 
     cl.init();
+
+    if (USE_STORAGE) {
+        storageIsAvailable = dataManager.initStorage();
+    }
 }
 
 void loop() {
@@ -44,6 +52,12 @@ void loop() {
 
     // reset additional data if a new day has come
     if (cl.isNewDay()) dataManager.clearCache();
+
+    if (USE_STORAGE) {
+        dataManager.updateTimeData(cl.getTimePack());
+        // TODO: only for test
+        dataManager.saveState();
+    }
 }
 
 void readTemperatureAndShow() {

@@ -20,8 +20,8 @@ void TClock::init() {
 const char *TClock::getTimeString() {
     _dt = _rtc.getDateTime();
 
-    static char result[TIME_STRING_SIZE];
-    sprintf(result, TIME_PATTERN, _dt.hour, _dt.minute, _dt.day, _dt.month, _dt.year);
+    static char result[TIME_DATE_STRING_SIZE];
+    sprintf(result, TIME_DATE_PATTERN, _dt.hour, _dt.minute, _dt.day, _dt.month, _dt.year);
 
     return result;
 }
@@ -34,4 +34,17 @@ bool TClock::isNewDay() {
     previousHourValue = _dt.hour;
 
     return result;
+}
+
+timePack TClock::getTimePack() {
+    _dt = _rtc.getDateTime();
+
+    char timeDate[TIME_DATE_STRING_SIZE];
+    sprintf(timeDate, TIME_DATE_PATTERN, _dt.hour, _dt.minute, _dt.day, _dt.month, _dt.year);
+    char time[TIME_STRING_SIZE];
+    sprintf(time, TIME_PATTERN, _dt.hour, _dt.minute, _dt.second);
+    char date[DATE_STRING_SIZE];
+    sprintf(date, DATE_PATTERN, _dt.day, _dt.month, _dt.year);
+
+    return timePack { _dt.unixtime, timeDate, time, date };
 }

@@ -5,7 +5,15 @@
 #ifndef CLOCK_H
 #define CLOCK_H
 
+#include "../common.h"
 #include <DS3231.h>
+
+#define TIME_DATE_PATTERN "%02d:%02d %02d.%02d.%d"
+#define TIME_DATE_STRING_SIZE 17
+#define TIME_PATTERN "%02d:%02d:%02d"
+#define TIME_STRING_SIZE 9
+#define DATE_PATTERN "%02d.%02d.%d"
+#define DATE_STRING_SIZE 11
 
 class TClock {
 public:
@@ -20,10 +28,9 @@ public:
      */
     bool isNewDay();
 
-private:
-    static const uint8_t TIME_STRING_SIZE = 17;
-    const char *TIME_PATTERN = "%02d:%02d %02d.%02d.%d";
+    timePack getTimePack();
 
+private:
     DS3231 _rtc;
     RTCDateTime _dt;
 
