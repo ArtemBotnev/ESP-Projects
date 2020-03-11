@@ -40,7 +40,10 @@ void DataManager::clearCache() {
 
 bool DataManager::initStorage() {
     _isStorageAvailable = SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
+    if (!_isStorageAvailable) return false;
+
     _fs = &SPIFFS;
+    _isStorageAvailable = recoverState();
 
     return _isStorageAvailable;
 }
@@ -51,6 +54,7 @@ void DataManager::setSaveStateFrequency(uint8_t minutes) {
 
 void DataManager::updateTimeData(timePack timePack) {
     _timePack = timePack;
+    saveStateIfNeeded();
 }
 
 DataManager::item *DataManager::getCacheItemByType(MeasureType type) {
@@ -71,6 +75,13 @@ DataManager::item *DataManager::getCacheItemByType(MeasureType type) {
     }
 }
 
+void DataManager::saveStateIfNeeded() {
+    if (!_isStorageAvailable) return;
+    if (_timePack.minute % _saveStateFrequency != 0) return;
+
+    _isStorageAvailable = saveState();
+}
+
 bool DataManager::saveState() {
     if (!_isStorageAvailable) return false;
 
@@ -81,16 +92,13 @@ bool DataManager::saveState() {
     bool result;
 
     // serialization;
-    const int capacity = JSON_OBJECT_SIZE(4) + JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT)
-                         + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5);
-
-    StaticJsonDocument<capacity> doc;
+    StaticJsonDocument<STATE_OBJECT_CAPACITY> doc;
     doc[epoch_time_s] = _timePack.epochSeconds;
+    doc[day_s] = _timePack.day;
     doc[date_s] = _timePack.date;
     doc[time_s] = _timePack.time;
 
-    const int arrayCapacity = JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT) + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5);
-    StaticJsonDocument<arrayCapacity> arrayDoc;
+    StaticJsonDocument<ITEMS_ARRAY_CAPACITY> arrayDoc;
     item *item;
     for (uint8_t i = 0; i < MEASURE_TYPES_COUNT; i++) {
         MeasureType type = (MeasureType) i;
@@ -114,4 +122,57 @@ bool DataManager::saveState() {
     file.close();
 
     return result;
+}
+
+bool DataManager::recoverState() {
+    if (!_isStorageAvailable) return false;
+
+    File file = _fs->open(stateFile);
+
+    if (!file || file.isDirectory()) return false;
+
+    bool result;
+
+    // deserialization;
+    StaticJsonDocument<STATE_OBJECT_CAPACITY> doc;
+    DeserializationError error = deserializeJson(doc, file);
+    file.close();
+    if (error) {
+        return false;
+    }
+
+    uint32_t epochTimeSeconds = doc[epoch_time_s];
+    uint8_t day = doc[day_s];
+
+    // check if should recover cache state or not
+    if (!shouldRecoverState(epochTimeSeconds, day)) return true;
+
+    StaticJsonDocument<ITEMS_ARRAY_CAPACITY> arrayDoc;
+    const char* jsonString = doc[measurements_s];
+    error = deserializeJson(arrayDoc, jsonString);
+    if (error) {
+        return false;
+    }
+
+    JsonArray array = arrayDoc.as<JsonArray>();
+    item *item;
+    for(JsonVariant v : array) {
+        MeasureType type = (MeasureType) (int) v[type_index_s];
+        item = getCacheItemByType(type);
+        if (!item) continue;
+
+        item->min = v[min_s];
+        item->max = v[max_s];
+        item->average = v[average_s];
+        item->factor = v[factor_s];
+    }
+
+    return true;
+}
+
+bool DataManager::shouldRecoverState(uint32_t epochSec, uint8_t day) {
+    uint32_t delta = _timePack.epochSeconds - epochSec;
+    bool isTheSameDay = _timePack.day == day;
+
+    return delta < 24 * 60 * 60 && isTheSameDay;
 }

@@ -2,6 +2,12 @@
 // Copyright Artem Botnev 2019-2020
 // MIT License
 
+// The project use SPIFFS file system available for ESP32 which allows to store current state.
+/* You only need to format SPIFFS the first time you run a
+   test or else use the SPIFFS plugin to create a partition
+   https://github.com/me-no-dev/arduino-esp32fs-plugin */
+// If you don't want to use storage just turn USE_STORAGE constant to false.
+
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
@@ -18,6 +24,7 @@
 #define I2C_SDA 33
 #define I2C_SCL 32
 
+// Turn to false if you don't want use storage
 #define USE_STORAGE true
 
 Adafruit_BME280 bme;
@@ -55,8 +62,6 @@ void loop() {
 
     if (USE_STORAGE) {
         dataManager.updateTimeData(cl.getTimePack());
-        // TODO: only for test
-        dataManager.saveState();
     }
 }
 

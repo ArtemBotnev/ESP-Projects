@@ -21,6 +21,7 @@ template <typename T> struct measureSet { const T curValue, min, average, max; }
  */
 struct timePack {
     uint32_t epochSeconds;
+    uint8_t day, minute;
     const char *timeDate, *time, *date;
 };
 

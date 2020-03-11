@@ -13,7 +13,8 @@ void TClock::init() {
     // check if compile time less than current
     if (curUnixtime > _dt.unixtime) {
         // probably the library bug, curUnixtime needs to be reduced by a day
-        _rtc.setDateTime(curUnixtime - 24 * 60 * 60);
+//        _rtc.setDateTime(curUnixtime - 24 * 60 * 60);
+        _rtc.setDateTime(curUnixtime);
     }
 }
 
@@ -39,12 +40,12 @@ bool TClock::isNewDay() {
 timePack TClock::getTimePack() {
     _dt = _rtc.getDateTime();
 
-    char timeDate[TIME_DATE_STRING_SIZE];
+    static char timeDate[TIME_DATE_STRING_SIZE];
     sprintf(timeDate, TIME_DATE_PATTERN, _dt.hour, _dt.minute, _dt.day, _dt.month, _dt.year);
-    char time[TIME_STRING_SIZE];
+    static char time[TIME_STRING_SIZE];
     sprintf(time, TIME_PATTERN, _dt.hour, _dt.minute, _dt.second);
-    char date[DATE_STRING_SIZE];
+    static char date[DATE_STRING_SIZE];
     sprintf(date, DATE_PATTERN, _dt.day, _dt.month, _dt.year);
 
-    return timePack { _dt.unixtime, timeDate, time, date };
+    return timePack { _dt.unixtime, _dt.day, _dt.minute, timeDate, time, date };
 }

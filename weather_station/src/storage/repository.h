@@ -13,6 +13,9 @@
 
 #define FORMAT_SPIFFS_IF_FAILED true
 
+#define STATE_OBJECT_CAPACITY JSON_OBJECT_SIZE(4) + JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT) + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5)
+#define ITEMS_ARRAY_CAPACITY JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT) + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5)
+
 class DataManager {
 
 public:
@@ -42,14 +45,12 @@ public:
      */
     void updateTimeData(timePack timePack);
 
-    //TODO: test should be replaced to private
-    bool saveState();
-
 private:
     // files:
     const char *stateFile = "/saved_state.json";
     // state:
     const char *epoch_time_s = "epoch_seconds";
+    const char *day_s = "day";
     const char *date_s = "date";
     const char *time_s = "time";
     const char *measurements_s = "measurements";
@@ -59,15 +60,11 @@ private:
     const char *average_s = "average";
     const char *factor_s = "factor";
     const char *empty = "empty";
-    // errors:
-    char *errorReadingCard = "Cannot read storage!";
-    char *errorFileOpening = "Error of file opening!";
-    char *errorJsonDeserialization = "Error of json deserialization! - ";
 
     // must be not less than 1 and not more than 59 minutes
     uint8_t _saveStateFrequency = 10; // 10 minutes interval by default
     // current time data, should be updated each iteration of loop function
-    timePack _timePack = timePack { 0, empty, empty, empty };
+    timePack _timePack = timePack { 0, 0, 0, empty, empty, empty };
     bool _isStorageAvailable;
     fs::FS *_fs;
 
@@ -93,27 +90,30 @@ private:
 
     item *getCacheItemByType(MeasureType type);
 
-//    /**
-//     * writes to file with @path according to @fileWriteAction algorithm
-//     * @param path
-//     * @param fileWriteAction
-//     * @return  true if all work as expected, otherwise false
-//     */
-//    bool writeToFile(const char path, bool (*fileWriteAction)(File));
-//
-//    /**
-//     * creates json string from cached data and stores it in file
-//     * @param file - pointer to file
-//     * @return true if all work as expected, otherwise false
-//     */
-//    bool stateToFile(File *file);
+    void saveStateIfNeeded();
 
-//    /**
-//     * reads state from json string and sets it to cache
-//     * @param json string
-//     * @return true if all work as expected, otherwise false
-//     */
-//    bool stateFromJson(const char *json);
+    /**
+     * saves current cache state to storage
+     *
+     * @return true if all work as expected, otherwise false
+     */
+    bool saveState();
+
+    /**
+     * recovers cache state from storage
+     *
+     * @return true if all work as expected, otherwise false
+     */
+    bool recoverState();
+
+    /**
+     * checks should recover state from storage data or not
+     *
+     * @param epochSec - epoch time (seconds) got from storage
+     * @param day - day of month got from storage
+     * @return true of current day is the same as day from storage data, otherwise false
+     */
+    bool shouldRecoverState(uint32_t epochSec, uint8_t day);
 };
 
 #endif //STORAGE_REPOSITORY_H
