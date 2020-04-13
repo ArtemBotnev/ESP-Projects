@@ -38,7 +38,9 @@ void DataManager::clearCache() {
     _cache = new Cache();
 }
 
-bool DataManager::initStorage() {
+bool DataManager::initStorage(timePack pack) {
+    _timePack = pack;
+
     _isStorageAvailable = SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED);
     if (!_isStorageAvailable) return false;
 

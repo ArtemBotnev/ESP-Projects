@@ -29,7 +29,7 @@ public:
      * inits SPIFFS storage
      * @return true if storage was successfully inited, otherwise false
      */
-    bool initStorage();
+    bool initStorage(timePack pack);
 
     /**
      * changes default frequency of cache state

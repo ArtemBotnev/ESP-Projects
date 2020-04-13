@@ -48,7 +48,7 @@ void setup() {
     cl.init();
 
     if (USE_STORAGE) {
-        storageIsAvailable = dataManager.initStorage();
+        storageIsAvailable = dataManager.initStorage(cl.getTimePack());
     }
 }
 
