@@ -6,6 +6,7 @@
 #define CLOCK_H
 
 #include <DS3231.h>
+#include "compile_time.h"
 
 class TClock {
 public:
