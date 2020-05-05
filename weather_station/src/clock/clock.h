@@ -7,6 +7,7 @@
 
 #include "../common.h"
 #include <DS3231.h>
+#include "compile_time.h"
 
 #define TIME_DATE_PATTERN "%02d:%02d %02d.%02d.%d"
 #define TIME_DATE_STRING_SIZE 17

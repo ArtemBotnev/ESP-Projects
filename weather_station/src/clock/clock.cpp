@@ -6,15 +6,11 @@
 
 void TClock::init() {
     _rtc.begin();
-
-    const uint32_t curUnixtime = _rtc.getDateTime().unixtime;
-    _rtc.setDateTime(__DATE__, __TIME__);
-    _dt = _rtc.getDateTime();
-    // check if compile time less than current
-    if (curUnixtime > _dt.unixtime) {
-        // probably the library bug, curUnixtime needs to be reduced by a day
-//        _rtc.setDateTime(curUnixtime - 24 * 60 * 60);
-        _rtc.setDateTime(curUnixtime);
+    // probably the library bug, unixtime needs to be reduced by a hour
+    uint32_t unixtime = __TIME_UNIX__ - 60 * 60;
+    // check if clock's time less than compile time
+    if (_rtc.getDateTime().unixtime < unixtime) {
+        _rtc.setDateTime(unixtime);
     }
 }
 
