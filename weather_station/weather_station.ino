@@ -24,7 +24,7 @@
 #define I2C_SDA 33
 #define I2C_SCL 32
 
-// Turn to false if you don't want use storage
+// Turn to false if you don't want to use storage
 #define USE_STORAGE true
 
 Adafruit_BME280 bme;
