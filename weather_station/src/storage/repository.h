@@ -13,8 +13,8 @@
 
 #define FORMAT_SPIFFS_IF_FAILED true
 
-#define STATE_OBJECT_CAPACITY JSON_OBJECT_SIZE(4) + JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT) + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5)
 #define ITEMS_ARRAY_CAPACITY JSON_ARRAY_SIZE(MEASURE_TYPES_COUNT) + MEASURE_TYPES_COUNT * JSON_OBJECT_SIZE(5)
+#define STATE_OBJECT_CAPACITY JSON_OBJECT_SIZE(5) + ITEMS_ARRAY_CAPACITY
 
 class DataManager {
 
@@ -35,7 +35,7 @@ public:
      * changes default frequency of cache state
      * can be used optionally because default value exists.
      *
-     * @param minutes interval of savings
+     * @param minutes interval of savings, must be from 0 to 59 (0 - save every loop iteration)
      */
     void setSaveStateFrequency(uint8_t minutes);
 
@@ -44,6 +44,11 @@ public:
      * @param timePack
      */
     void updateTimeData(timePack timePack);
+
+    /**
+     * @return true - there are no problem with the storage in current time, otherwise false
+     */
+    bool isStorageAvailable();
 
 private:
     // files:
@@ -61,11 +66,13 @@ private:
     const char *factor_s = "factor";
     const char *empty = "empty";
 
-    // must be not less than 1 and not more than 59 minutes
+    // must be from 0 to 59 (0 - save every loop iteration)
     uint8_t _saveStateFrequency = 10; // 10 minutes interval by default
+    uint8_t _lastMinute;
     // current time data, should be updated each iteration of loop function
     timePack _timePack = timePack { 0, 0, 0, empty, empty, empty };
     bool _isStorageAvailable;
+    bool _alreadySaved;
     fs::FS *_fs;
 
     struct item {

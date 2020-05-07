@@ -45,18 +45,23 @@ bool DataManager::initStorage(timePack pack) {
     if (!_isStorageAvailable) return false;
 
     _fs = &SPIFFS;
-    _isStorageAvailable = recoverState();
+    recoverState();
 
+    Serial.println(_isStorageAvailable);
     return _isStorageAvailable;
 }
 
 void DataManager::setSaveStateFrequency(uint8_t minutes) {
-    _saveStateFrequency = minutes;
+    _saveStateFrequency = minutes % 60;
 }
 
 void DataManager::updateTimeData(timePack timePack) {
     _timePack = timePack;
     saveStateIfNeeded();
+}
+
+bool DataManager::isStorageAvailable() {
+    return _isStorageAvailable;
 }
 
 DataManager::item *DataManager::getCacheItemByType(MeasureType type) {
@@ -79,9 +84,27 @@ DataManager::item *DataManager::getCacheItemByType(MeasureType type) {
 
 void DataManager::saveStateIfNeeded() {
     if (!_isStorageAvailable) return;
-    if (_timePack.minute % _saveStateFrequency != 0) return;
 
-    _isStorageAvailable = saveState();
+    if(_saveStateFrequency == 0) {
+        _isStorageAvailable = saveState();
+        return;
+    }
+
+    if(_saveStateFrequency == 1 && _timePack.minute != _lastMinute) {
+        _isStorageAvailable = saveState();
+        _lastMinute = _timePack.minute;
+        return;
+    }
+
+    if (_timePack.minute % _saveStateFrequency != 0) {
+        _alreadySaved = false;
+        return;
+    }
+
+    if (!_alreadySaved) {
+        _isStorageAvailable = saveState();
+        _alreadySaved = true;
+    }
 }
 
 bool DataManager::saveState() {
@@ -90,8 +113,6 @@ bool DataManager::saveState() {
     File file = _fs->open(stateFile, FILE_WRITE);
 
     if (!file) return false;
-
-    bool result;
 
     // serialization;
     StaticJsonDocument<STATE_OBJECT_CAPACITY> doc;
@@ -115,12 +136,7 @@ bool DataManager::saveState() {
     }
     doc[measurements_s] = arrayDoc;
 
-    if (serializeJson(doc, file) == 0) {
-        result = false;
-    } else {
-        result = true;
-    }
-
+    bool result = serializeJson(doc, file);
     file.close();
 
     return result;
@@ -136,7 +152,7 @@ bool DataManager::recoverState() {
     bool result;
 
     // deserialization;
-    StaticJsonDocument<STATE_OBJECT_CAPACITY> doc;
+    StaticJsonDocument<STATE_OBJECT_CAPACITY + ITEMS_ARRAY_CAPACITY> doc;
     DeserializationError error = deserializeJson(doc, file);
     file.close();
     if (error) {
