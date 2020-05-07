@@ -7,11 +7,32 @@
 void TClock::init() {
     _rtc.begin();
     RTCDateTime dt = _rtc.getDateTime();
+    // probably the library bug, unixtime needs to be reduced by an hour
+    const uint32_t unixtime = __TIME_UNIX__ - 60 * 60;
 
-    if (dt.year < __TIME_YEARS__ || dt.month < __TIME_MONTH__ || dt.day < __TIME_DAYS__ || dt.hour < __TIME_HOURS__
-        || dt.minute < __TIME_MINUTES__) {
-        // probably the library bug, unixtime needs to be reduced by an hour
-        _rtc.setDateTime(__TIME_UNIX__ - 60 * 60);
+    if(dt.year < __TIME_YEARS__) {
+        _rtc.setDateTime(unixtime);
+        return;
+    }
+
+    if(dt.month < __TIME_MONTH__ && dt.year == __TIME_YEARS__) {
+        _rtc.setDateTime(unixtime);
+        return;
+    }
+
+    if(dt.day < __TIME_DAYS__ && dt.month == __TIME_MONTH__ && dt.year == __TIME_YEARS__) {
+        _rtc.setDateTime(unixtime);
+        return;
+    }
+
+    if(dt.hour < __TIME_HOURS__ && dt.day == __TIME_DAYS__ && dt.month == __TIME_MONTH__ && dt.year == __TIME_YEARS__) {
+        _rtc.setDateTime(unixtime);
+        return;
+    }
+
+    if(dt.minute < __TIME_MINUTES__ && dt.hour == __TIME_HOURS__ && dt.day == __TIME_DAYS__
+        && dt.month == __TIME_MONTH__ && dt.year == __TIME_YEARS__) {
+        _rtc.setDateTime(unixtime);
     }
 }
 
