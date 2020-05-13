@@ -49,6 +49,7 @@ void setup() {
 
     if (USE_STORAGE) {
         storageIsAvailable = dataManager.initStorage(cl.getTimePack());
+        dataManager.setSaveStateFrequency(0);
     }
 }
 
@@ -57,10 +58,9 @@ void loop() {
     readHumidityAndShow();
     readAtmPressureAndShow();
 
-    // reset additional data if a new day has come
-    if (cl.isNewDay()) dataManager.clearCache();
-
     if (USE_STORAGE) {
+        // reset additional data if a new day has come
+        if (cl.isNewDay()) dataManager.clearCache();
         dataManager.updateTimeData(cl.getTimePack());
     }
 }

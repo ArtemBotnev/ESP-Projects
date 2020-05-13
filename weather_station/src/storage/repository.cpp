@@ -47,7 +47,6 @@ bool DataManager::initStorage(timePack pack) {
     _fs = &SPIFFS;
     recoverState();
 
-    Serial.println(_isStorageAvailable);
     return _isStorageAvailable;
 }
 
@@ -166,8 +165,7 @@ bool DataManager::recoverState() {
     if (!shouldRecoverState(epochTimeSeconds, day)) return true;
 
     StaticJsonDocument<ITEMS_ARRAY_CAPACITY> arrayDoc;
-    const char* jsonString = doc[measurements_s];
-    error = deserializeJson(arrayDoc, jsonString);
+    arrayDoc = doc[measurements_s];
     if (error) {
         return false;
     }
