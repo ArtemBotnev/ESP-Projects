@@ -49,7 +49,6 @@ void setup() {
 
     if (USE_STORAGE) {
         storageIsAvailable = dataManager.initStorage(cl.getTimePack());
-        dataManager.setSaveStateFrequency(0);
     }
 }
 
