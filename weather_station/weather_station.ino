@@ -1,6 +1,12 @@
 // Weather station
-// Copyright Artem Botnev 2019
+// Copyright Artem Botnev 2019-2020
 // MIT License
+
+// The project use SPIFFS file system available for ESP32 which allows to store current state.
+/* You only need to format SPIFFS the first time you run a
+   test or else use the SPIFFS plugin to create a partition
+   https://github.com/me-no-dev/arduino-esp32fs-plugin */
+// If you don't want to use storage just turn USE_STORAGE constant to false.
 
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
@@ -24,6 +30,9 @@
 char ssid[] = "XXXXXX";     // your network SSID (name)
 char password[] = "YYYYYY"; // your network key
 
+// Turn to false if you don't want to use storage
+#define USE_STORAGE true
+
 Adafruit_BME280 bme;
 DFRobot_SHT20 sht20;
 
@@ -33,6 +42,8 @@ DataManager dataManager;
 WifiConnectManager wifiManger;
 
 bool isNetAvailable;
+
+bool storageIsAvailable;
 
 void setup() {
     Wire.begin(I2C_SDA, I2C_SCL);
@@ -46,6 +57,10 @@ void setup() {
     if (NETWORK_ENABLED) wifiManger.init(ssid, password);
 
     cl.init();
+
+    if (USE_STORAGE) {
+        storageIsAvailable = dataManager.initStorage(cl.getTimePack());
+    }
 }
 
 void loop() {
@@ -54,6 +69,12 @@ void loop() {
     readAtmPressureAndShow();
 
     if (NETWORK_ENABLED) doNetWork();
+
+    if (USE_STORAGE) {
+        // reset additional data if a new day has come
+        if (cl.isNewDay()) dataManager.clearCache();
+        dataManager.updateTimeData(cl.getTimePack());
+    }
 }
 
 void readTemperatureAndShow() {
