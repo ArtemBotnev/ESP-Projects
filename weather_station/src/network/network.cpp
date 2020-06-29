@@ -4,17 +4,23 @@
 
 #include "network.h"
 
-WifiConnectManager::WifiConnectManager() = default;
+NetworkManager::NetworkManager() = default;
 
-void WifiConnectManager::init(const char* ssid, const char* password) {
+void NetworkManager::init(const char* ssid, const char* password) {
     WiFi.mode(WIFI_STA);
     WiFi.begin(ssid, password);
 }
 
-bool WifiConnectManager::connectionEstablished() {
-    return WiFi.status() != WL_CONNECTED;
+bool NetworkManager::connectionEstablished() {
+    return WiFi.status() == WL_CONNECTED;
 }
 
-//WiFiClientSecure WifiConnectManager::getClient() {
-//
-//}
+void NetworkManager::runTasks() {
+    if (_telegramService) {
+        _telegramService->botInteraction();
+    }
+}
+
+void NetworkManager::initTelegramService(const char* token) {
+    _telegramService = new TelegramService(token, &_client);
+}

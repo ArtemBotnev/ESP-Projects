@@ -7,22 +7,26 @@
 
 #include <WiFi.h>
 #include <WiFiClientSecure.h>
-//#include <UniversalTelegramBot.h>
 //#include <DELAY.h>
 
-class WifiConnectManager {
+#include "telegram_service.h"
+
+class NetworkManager {
 
 public:
-    WifiConnectManager();
+    NetworkManager();
 
     void init(const char* ssid, const char* password);
 
     bool connectionEstablished();
 
-//    WiFiClientSecure getClient();
+    void runTasks();
+
+    void initTelegramService(const char* token);
 
 private:
-//    WiFiClientSecure client;
+    WiFiClientSecure _client;
+    TelegramService *_telegramService;
 };
 
 #endif //NETWORK_H

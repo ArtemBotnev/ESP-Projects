@@ -25,13 +25,16 @@
 #define I2C_SDA 33
 #define I2C_SCL 32
 
-#define NETWORK_ENABLED true
-
-char ssid[] = "XXXXXX";     // your network SSID (name)
-char password[] = "YYYYYY"; // your network key
-
 // Turn to false if you don't want to use storage
 #define USE_STORAGE true
+// Turn to false if you don't want to use network
+#define NETWORK_ENABLED true
+// Turn to false if you don't want to use telegram (available only if network enabled)
+#define TELEGRAM_ENABLED true
+
+#define SSID "XXXXXX"     // your network SSID (name)
+#define PASSWORD "YYYYYY" // your network key
+#define BOT_TOKEN "XXXXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"  // your Bot Token (Get from Botfather)
 
 Adafruit_BME280 bme;
 DFRobot_SHT20 sht20;
@@ -39,7 +42,7 @@ DFRobot_SHT20 sht20;
 Display display;
 TClock cl;
 DataManager dataManager;
-WifiConnectManager wifiManger;
+NetworkManager networkManager;
 
 bool isNetAvailable;
 
@@ -54,13 +57,17 @@ void setup() {
     display.showTitle = true;
     display.showAdditionData = true;
 
-    if (NETWORK_ENABLED) wifiManger.init(ssid, password);
-
     cl.init();
 
     if (USE_STORAGE) {
         storageIsAvailable = dataManager.initStorage(cl.getTimePack());
     }
+
+    if (NETWORK_ENABLED) {
+        networkManager.init(SSID, PASSWORD);
+        if (TELEGRAM_ENABLED) networkManager.initTelegramService(BOT_TOKEN);
+    }
+
 }
 
 void loop() {
@@ -68,13 +75,13 @@ void loop() {
     readHumidityAndShow();
     readAtmPressureAndShow();
 
-    if (NETWORK_ENABLED) doNetWork();
-
     if (USE_STORAGE) {
         // reset additional data if a new day has come
         if (cl.isNewDay()) dataManager.clearCache();
         dataManager.updateTimeData(cl.getTimePack());
     }
+
+    if (NETWORK_ENABLED) doNetWork();
 }
 
 void readTemperatureAndShow() {
@@ -118,9 +125,7 @@ void readAtmPressureAndShow() {
 }
 
 void doNetWork() {
-    if (isNetAvailable) {
-//        TODO:"do network"
-    } else {
-        isNetAvailable = wifiManger.connectionEstablished();
+    if (isNetAvailable = networkManager.connectionEstablished()) {
+        networkManager.runTasks();
     }
 }
