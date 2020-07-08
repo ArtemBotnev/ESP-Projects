@@ -102,8 +102,9 @@ void Display::drawAdditionalData(uint8_t shiftY, measureSet<int16_t> measure, ui
     tft.print(measure.min);
     // average value
     tft.setCursor(110, yb);
-    tft.setTextColor(value_color(measure.average));
-    tft.print(measure.average);
+    int16_t average = round(measure.average);
+    tft.setTextColor(value_color(average));
+    tft.print(average);
     // max value
     tft.setCursor(200, yb);
     tft.setTextColor(value_color(measure.max));
@@ -127,4 +128,8 @@ void Display::drawBottom() {
     tft.print(AVERAGE);
     tft.setCursor(192, 300);
     tft.print(MAX);
+}
+
+int16_t Display::round(float value) {
+    return (int16_t)(value + 0.5f);
 }

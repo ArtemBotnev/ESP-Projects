@@ -101,6 +101,8 @@ private:
             uint16_t (*value_color)(int16_t));
 
     void drawAdditionalData(uint8_t shiftY, measureSet<int16_t> measure, uint16_t (*value_color)(int16_t));
+
+    int16_t round(float value);
 };
 
 #endif

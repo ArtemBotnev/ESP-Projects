@@ -15,6 +15,8 @@ measureSet<int16_t> DataManager::getMeasureSet(MeasureType type, int16_t current
         return measureSet<int16_t> { -1000, -1000, -1000, -1000 };
     }
 
+    item->current = currentVal;
+
     if (currentVal < item->min) {
         item->min = currentVal;
     }
@@ -30,7 +32,7 @@ measureSet<int16_t> DataManager::getMeasureSet(MeasureType type, int16_t current
         item->factor++;
     }
 
-    return measureSet<int16_t> { currentVal, item->min, (int16_t)(item->average + 0.5f), item->max };
+    return measureSet<int16_t> { currentVal, item->min, item->average , item->max };
 }
 
 void DataManager::clearCache() {
@@ -191,4 +193,26 @@ bool DataManager::shouldRecoverState(uint32_t epochSec, uint8_t day) {
     bool isTheSameDay = _timePack.day == day;
 
     return delta < 24 * 60 * 60 && isTheSameDay;
+}
+
+measureSet<int16_t> *DataManager::getMeasuresArray() {
+    item *roomTemper = getCacheItemByType(ROOM_TEMPER);
+    item *outTemper = getCacheItemByType(OUT_TEMPER);
+    item *roomHum = getCacheItemByType(ROOM_HUM);
+    item *outHum = getCacheItemByType(OUT_HUM);
+    item *pressure = getCacheItemByType(PRESSURE);
+
+    static measureSet<int16_t> result[] {
+            itemToMeasureSet(roomTemper),
+            itemToMeasureSet(outTemper),
+            itemToMeasureSet(roomHum),
+            itemToMeasureSet(outHum),
+            itemToMeasureSet(pressure),
+    };
+
+    return result;
+}
+
+measureSet<int16_t> DataManager::itemToMeasureSet(item *item) {
+    return measureSet<int16_t> { item->current, item->min, item->average, item->max };
 }

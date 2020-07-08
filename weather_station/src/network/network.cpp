@@ -15,9 +15,9 @@ bool NetworkManager::connectionEstablished() {
     return WiFi.status() == WL_CONNECTED;
 }
 
-void NetworkManager::runTasks() {
+void NetworkManager::runTasks(timePack time, measureSet<int16_t> *(*measureArrayGetter)()) {
     if (_telegramService) {
-        _telegramService->botInteraction();
+        _telegramService->botInteraction(time, measureArrayGetter);
     }
 }
 

@@ -48,6 +48,10 @@ bool isNetAvailable;
 
 bool storageIsAvailable;
 
+measureSet<int16_t> *getMeasuresArray() {
+    return dataManager.getMeasuresArray();
+}
+
 void setup() {
     Wire.begin(I2C_SDA, I2C_SCL);
     bme.begin();
@@ -75,13 +79,15 @@ void loop() {
     readHumidityAndShow();
     readAtmPressureAndShow();
 
+    timePack time = cl.getTimePack();
+
     if (USE_STORAGE) {
         // reset additional data if a new day has come
         if (cl.isNewDay()) dataManager.clearCache();
-        dataManager.updateTimeData(cl.getTimePack());
+        dataManager.updateTimeData(time);
     }
 
-    if (NETWORK_ENABLED) doNetWork();
+    if (NETWORK_ENABLED) doNetWork(time, getMeasuresArray);
 }
 
 void readTemperatureAndShow() {
@@ -124,8 +130,8 @@ void readAtmPressureAndShow() {
     delay(SCREEN_DELAY);
 }
 
-void doNetWork() {
+void doNetWork(timePack time, measureSet<int16_t> *(*measureArrayGetter)()) {
     if (isNetAvailable = networkManager.connectionEstablished()) {
-        networkManager.runTasks();
+        networkManager.runTasks(time, measureArrayGetter);
     }
 }

@@ -50,6 +50,11 @@ public:
      */
     bool isStorageAvailable();
 
+    /**
+     * @return array of measureSet where index corresponds to number of MeasureType enum entry
+     */
+    measureSet<int16_t> *getMeasuresArray();
+
 private:
     // files:
     const char *stateFile = "/saved_state.json";
@@ -60,6 +65,7 @@ private:
     const char *time_s = "time";
     const char *measurements_s = "measurements";
     const char *type_index_s = "type_index";
+    const char *current_s = "current";
     const char *min_s = "min";
     const char *max_s = "max";
     const char *average_s = "average";
@@ -76,6 +82,7 @@ private:
     fs::FS *_fs;
 
     struct item {
+        int16_t current;
         int16_t min;
         int16_t max;
         float average;
@@ -84,13 +91,13 @@ private:
 
     struct Cache {
         // temperature
-        item roomTemp { 100, -100, -100.0f, 1 };
-        item outTemp { 100, -100, -100.0f, 1 };
+        item roomTemp { 0, 100, -100, -100.0f, 1 };
+        item outTemp { 0, 100, -100, -100.0f, 1 };
         // humidity
-        item roomHum { 100, -100, .0f, 1 };
-        item outHum { 100, -100, .0f, 1 };
+        item roomHum { 0, 100, -100, .0f, 1 };
+        item outHum { 0, 100, -100, .0f, 1 };
         // pressure
-        item pressure { 1000, -100, .0f, 1 };
+        item pressure { 0, 1000, -100, .0f, 1 };
     };
 
     Cache *_cache;
@@ -121,6 +128,8 @@ private:
      * @return true of current day is the same as day from storage data, otherwise false
      */
     bool shouldRecoverState(uint32_t epochSec, uint8_t day);
+
+    measureSet<int16_t> itemToMeasureSet(item *item);
 };
 
 #endif //STORAGE_REPOSITORY_H

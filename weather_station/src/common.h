@@ -14,7 +14,12 @@ enum MeasureType { ROOM_TEMPER, OUT_TEMPER, ROOM_HUM, OUT_HUM, PRESSURE };
 /**
  * Container for measured parameters
  */
-template <typename T> struct measureSet { const T curValue, min, average, max; };
+template <typename T> struct measureSet {
+    const T curValue;
+    const T min;
+    const float average;
+    const T max;
+};
 
 /**
  * Pack for time data
