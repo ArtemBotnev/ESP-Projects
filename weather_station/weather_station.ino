@@ -71,7 +71,6 @@ void setup() {
         networkManager.init(SSID, PASSWORD);
         if (TELEGRAM_ENABLED) networkManager.initTelegramService(BOT_TOKEN);
     }
-
 }
 
 void loop() {

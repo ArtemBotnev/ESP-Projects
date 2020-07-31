@@ -30,7 +30,35 @@ public:
 private:
     UniversalTelegramBot _bot;
 
-    void replay(uint8_t messageNum, measureSet<int16_t> *measures);
+    const char *_str_temper = "Temperature";
+    const char *_str_hum = "Humidity";
+    const char *_str_press = "Pressure";
+
+    const char *_str_out = "out";
+    const char *_str_room = "room";
+
+    const char *_str_current = "current";
+    const char *_str_min = "min";
+    const char *_str_max = "max";
+    const char *_str_av = "average";
+
+    void replay(uint8_t messageNum, timePack time, measureSet<int16_t> *measures);
+
+    const char *buildTemperBlock(measureSet<int16_t> *measures, bool isFullBlock);
+
+    const char *buildHumBlock(measureSet<int16_t> *measures, bool isFullBlock);
+
+    const char *buildPressureBlock(measureSet<int16_t> *measures, bool isFullBlock);
+
+    const char *buildShortPressureBlock(measureSet<int16_t> measure);
+
+    const char *buildOutRoomShortBlock(const char *title, measureSet<int16_t> out, measureSet<int16_t> room);
+
+    const char *buildFullPressureBlock(measureSet<int16_t> measure);
+
+    const char *buildOutRoomFullBlock(const char *title, measureSet<int16_t> out, measureSet<int16_t> room);
+
+    const char *buildFullMeasureBlock(measureSet<int16_t> measure);
 };
 
 #endif //TELEGRAM_SERVICE_H
