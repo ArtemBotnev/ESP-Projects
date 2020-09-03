@@ -4,11 +4,13 @@
 Three screens change in a loop and show current: Temperature(t, C), Humidity(h, %), Atm. pressure(p, mmHg).
 Also, for each measure parameter there're additional data: minimum value, average value, maximum value.
 All additional values calculated for the current day, and reset at the beginning of a new day (period from 00:00 to 23:59).
+Available interaction with telegram bot, which send data message.
 
 <img src="https://github.com/ArtemBotnev/gifs/blob/master/esp32_weather_station/temp.png" width="184" height="250"> <img src="https://github.com/ArtemBotnev/gifs/blob/master/esp32_weather_station/humidity.png" width="182" height="248"> <img src="https://github.com/ArtemBotnev/gifs/blob/master/esp32_weather_station/ws_pressure.png" width="167" height="248">
 
 - [Display settings](#display-settings)
 - [Storage settings](#storage-settings)
+- [Telegram bot settings](#telegram-bot-settings)
 - [List of dependencies(libraries)](#list-of-dependencieslibraries)
 - [List of modules(components)](#list-of-modulescomponents)
 - [Pin connections](#pin-connections)
@@ -46,6 +48,36 @@ dataManager.setSaveStateFrequency(20);
 ```
 By default it is 10. Value shout be from 0 to 59 (0 - save every loop iteration).
 
+#### Telegram bot settings:
+One important option is interaction with telegram bot. 
+<br>
+First of all, it's necessary to create telegram bot by the [Bot father](https://core.telegram.org/bots#3-how-do-i-create-a-bot). 
+<br>
+Next step - enable network, telegram options and add WiFi network properties:
+```c++ 
+// Turn to false if you don't want to use network
+#define NETWORK_ENABLED true
+// Turn to false if you don't want to use telegram (available only if network enabled)
+#define TELEGRAM_ENABLED true
+
+#define SSID "XXXXXX"     // your network SSID (name)
+#define PASSWORD "YYYYYY" // your network key
+```
+when add bot token:
+```c++ 
+#define BOT_TOKEN "XXXXXXXXX:XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"  // your Bot Token (Get from Botfather)
+```
+Now bot is ready.
+<br>
+Start messaging with bot - send any message, bot will respond with last measured data.
+
+<img src="https://github.com/ArtemBotnev/gifs/blob/master/esp32_weather_station/weather_bot_message.png" width="352" height="260">
+
+Bot also can respond with additional data set (min, average, max value for each measure parameter).
+In that case send to bot message, which start with latin letter 'f' or 'F' or with cyrillic letter 'п' or 'П'.
+
+<img src="https://github.com/ArtemBotnev/gifs/blob/master/esp32_weather_station/weather_bot_full_message.png" width="352" height="600">
+
 #### List of dependencies(libraries):
 - Core
   - Wire - provided with IDE.
@@ -63,6 +95,12 @@ By default it is 10. Value shout be from 0 to 59 (0 - save every loop iteration)
   - FS - provided with ESP32 plugin.
   - SPIFFS - provided with ESP32 plugin.
   - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+- Network
+  - WiFi - provided with ESP32 plugin.
+  - WiFiClientSecure - provided with ESP32 plugin.
+- Telegram bot
+  - WiFiClientSecure - provided with ESP32 plugin.  
+  - [UniversalTelegramBot](https://github.com/witnessmenow/Universal-Arduino-Telegram-Bot)  
   
 #### List of modules(components):
 - Core
